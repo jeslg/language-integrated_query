@@ -10,6 +10,20 @@ object EDSL {
   case class People(name: String, age: Int)
   case class Couples(her: String, him: String)
 
+  object QueryViaQuotation {
+
+    val difference = quote {
+      for {
+        c <- query[Couples]
+        w <- query[People]
+        m <- query[People]
+        if c.her == w.name && c.him == m.name && w.age > m.age
+      } yield (w.name, w.age - m.age)
+    }
+
+    ctx.run(difference)
+  }
+
   object AbstractingOverValues {
     
     val range = quote { (a: Int, b: Int) =>
