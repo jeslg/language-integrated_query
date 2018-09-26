@@ -10,6 +10,55 @@ object EDSL {
   case class People(name: String, age: Int)
   case class Couples(her: String, him: String)
 
+  object Primitives {
+    
+    val getPeople = quote {
+      query[People]
+    }
+
+    ctx.run(getPeople)
+
+    val getPeopleName = quote {
+      query[People].map(_.name)
+    }
+
+    ctx.run(getPeopleName)
+
+    val getPeopleOnTheirThirties = quote {
+      for {
+        p <- query[People]
+        if 30 <= p.age && p.age < 40
+      } yield p
+    }
+
+    ctx.run(getPeopleOnTheirThirties)
+
+    // Basically same as query[Couples] but this excludes women without a couple
+    val getHerAges = quote {
+      for {
+        w <- query[People]
+        n <- query[Couples].map(_.her)
+        if w.name == n
+      } yield w.age
+    }
+
+    ctx.run(getHerAges)
+  }
+
+  object QueryViaQuotation {
+
+    val difference = quote {
+      for {
+        c <- query[Couples]
+        w <- query[People]
+        m <- query[People]
+        if c.her == w.name && c.him == m.name && w.age > m.age
+      } yield (w.name, w.age - m.age)
+    }
+
+    ctx.run(difference)
+  }
+
   object AbstractingOverValues {
     
     val range = quote { (a: Int, b: Int) =>
