@@ -33,33 +33,32 @@ object Statelesser {
 
   object Primitives {
 
-    // XXX: does this make sense as statelesser apply parameter?
-    trait Selector[Alg[_[_], _], X] {
-      def apply[Q[_], S](alg: Alg[Q, S]): Q[X]
-    }
-      
-    val selNameAge = new Selector[Person, (String, Int)] {
-      def apply[Q[_], A](p: Person[Q, A]): Q[(String, Int)] =
-        p.self.tuple2(p.name.get, p.age.get) 
+    def selNameAge[Per] = new InitialSAlg[Person, Per, (String, Int)] {
+      def apply[Q[_]](alg: Person[Q, Per]): Q[(String, Int)] =
+        alg.self.tuple2(alg.name.get, alg.age.get)
     }
 
     def getPeople0[Per, Cou, P[_]: Monad, Cous](
         ctx: Couples[Per, Cou, P, Cous]): P[List[((String, Int))]] = {
       import ctx.all, all.alg.{her, him}
       for {
-        ws <- (all composeLens her)(selNameAge.apply)
-        ms <- (all composeLens him)(selNameAge.apply)
+        ws <- (all composeLens her)(selNameAge)
+        ms <- (all composeLens him)(selNameAge)
       } yield ms ++ ws
     }
 
     getPeople0(ctx).run(cps)
 
+    def selSelf[Per] = new InitialSAlg[Person, Per, Per] {
+      def apply[Q[_]](alg: Person[Q, Per]): Q[Per] = alg.self.get
+    }
+
     def getPeople[Per, Cou, P[_]: Monad, Cous](
         ctx: Couples[Per, Cou, P, Cous]): P[List[Per]] = {
       import ctx.all, all.alg.{her, him}
       for {
-        ws <- (all composeLens her)(_.self.get)
-        ms <- (all composeLens him)(_.self.get)
+        ws <- (all composeLens her)(selSelf)
+        ms <- (all composeLens him)(selSelf)
       } yield ms ++ ws
     }
 
@@ -86,14 +85,13 @@ object Statelesser {
 
     getPeopleOnTheirThirties0(ctx).run(cps)
 
-    val selList = new Selector[Person, List[(String, Int)]] {
-      def apply[Q[_], S](p: Person[Q, S]): Q[List[(String, Int)]] = {
-        implicit val M = p.self
+    def selList[Per] = new InitialSAlg[Person, Per, List[(String, Int)]] {
+      def apply[Q[_]](alg: Person[Q, Per]): Q[List[(String, Int)]] = {
+        implicit val M = alg.self
         for {
-          age  <- p.age.get
-          name <- p.name.get
-        } yield if (30 <= age && age < 40) (name, age).point[List] 
-                else List.empty
+          age <- alg.age.get
+          name <- alg.name.get
+        } yield if (30 <= age && age < 40) (name, age).point[List] else List.empty
       }
     }
     
@@ -101,8 +99,8 @@ object Statelesser {
         ctx: Couples[Per, Cou, P, Cous]): P[List[(String, Int)]] = {
       import ctx.all, all.alg.{her, him}
       for {
-        ws <- (all composeLens her).fold(selList.apply) 
-        ms <- (all composeLens him).fold(selList.apply) 
+        ws <- (all composeLens her).fold(selList) 
+        ms <- (all composeLens him).fold(selList) 
       } yield ms ++ ws
     }
 
