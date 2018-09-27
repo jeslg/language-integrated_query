@@ -168,7 +168,7 @@ object Statelesser2 {
       getPeople(tr).map(_.map(_._1))
 
     // nicer version
-    def getPeopleName[P[_], Peo](
+    def getPeopleName_[P[_], Peo](
         tr: TraversalAlgHom[Person, P, Peo]): P[List[String]] =
       (tr composeLens tr.alg.name).getAll
 
@@ -195,6 +195,11 @@ object Statelesser2 {
       import tr.alg.her, her.alg.age
       (tr composeLens her composeLens age).getAll
     }
+  }
+
+  import Primitives._
+  
+  object QueryViaQuotation {
 
     def isHerOlder[Cou, Per] = 
       new InitialSAlg[Couple[Per, ?[_], ?], Cou, Boolean] {
@@ -216,11 +221,7 @@ object Statelesser2 {
               (him composeLens him.alg.age).get) { _ - _ })
         }
       }
-  }
 
-  import Primitives._
-  
-  object QueryViaQuotation {
     def difference[P[_]: Functor, Cou, Per](
         tr: TraversalAlgHom[Couple[Per, ?[_], ?], P, Cou]): P[List[(String, Int)]] = {
       tr.filter(isHerOlder, selNameDiff)(implicitly, tr.alg.self)
@@ -286,5 +287,31 @@ object Statelesser2 {
         r  <- range(tr)(a1, a2).liftM[OptionT]
       } yield r).run
   }
+
+  case class People[P[_], Per](all: TraversalAlgHom[Person, P, Per])
+
+  case class SPerson(name: String, age: Int)
+  case class SPeople(all: List[SPerson])
+
+  val stPeople = make[People[State[SPeople, ?], SPerson]]
+
+  case class Couples[Per, Cou, P[_], Cous](
+    all: TraversalAlgHom[Couple[Per, ?[_], ?], P, Cou])
+
+  case class SCouple(her: SPerson, him: SPerson)
+  case class SCouples(all: List[SCouple])
+
+  val stCouples = make[Couples[SPerson, SCouple, State[SCouples, ?], SCouples]]
+
+  val paul = SPerson("paul", 35)
+  val mary = SPerson("mary", 26)
+  val john = SPerson("john", 39)
+  val nick = SPerson("nick", 62)
+  val anne = SPerson("anne", 70)
+
+  val people = SPeople(List(paul, mary, john, nick, anne))
+  val mary_paul = SCouple(mary, paul)
+  val anne_nick = SCouple(anne, nick)
+  val couples = SCouples(List(mary_paul, anne_nick))
 }
 
