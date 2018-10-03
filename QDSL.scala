@@ -2,7 +2,7 @@ package org.hablapps.liq
 
 import io.getquill._
 
-object EDSL {
+object QDSL {
 
   val ctx = new SqlMirrorContext(MirrorSqlDialect, Literal)
   import ctx._

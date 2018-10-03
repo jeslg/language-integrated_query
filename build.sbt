@@ -22,8 +22,9 @@ scalacOptions ++= Seq(
   "-language:higherKinds")
 
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.2.8",
+  "org.scalaz" %% "scalaz-core" % "7.2.26",
   "com.chuusai" %% "shapeless" % "2.3.3",
   "io.getquill" %% "quill-sql" % "2.5.4",
-  "org.hablapps" %% "statelesser" % "0.1-SNAPSHOT")
+  "org.hablapps" %% "statelesser" % "0.1-SNAPSHOT",
+  "io.getquill" %% "quill-async-mysql" % "2.5.4")
 

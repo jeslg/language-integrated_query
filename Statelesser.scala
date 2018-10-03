@@ -195,6 +195,31 @@ object Statelesser2 {
       import tr.alg.her, her.alg.age
       (tr composeLens her composeLens age).getAll
     }
+
+    /* bonus: update queries */
+
+    def uppercase[Per] = new InitialSAlg[Person, Per, Unit] {
+      def apply[Q[_]](alg: Person[Q, Per]): Q[Unit] =
+        alg.name.modify(_.toUpperCase)
+    }
+
+    def lowercase[Per] = new InitialSAlg[Person, Per, Unit] {
+      def apply[Q[_]](alg: Person[Q, Per]): Q[Unit] =
+        alg.name.modify(_.toLowerCase.capitalize)
+    }
+
+    def applyOnTheirThirties[P[_]: Functor, Per, Out](
+        tr: TraversalAlgHom[Person, P, Per])(
+        p: InitialSAlg[Person, Per, Out]): P[List[Out]] =
+      tr.filter(isOnThirties, p)(implicitly, tr.alg.self)
+
+    def uppercasePeopleOnTheirThirties[P[_]: Functor, Per](
+        tr: TraversalAlgHom[Person, P, Per]): P[Unit] =
+      applyOnTheirThirties(tr)(uppercase).void
+
+    def lowercasePeopleOnTheirThirties[P[_]: Functor, Per](
+        tr: TraversalAlgHom[Person, P, Per]): P[Unit] =
+      applyOnTheirThirties(tr)(lowercase).void
   }
 
   import Primitives._
