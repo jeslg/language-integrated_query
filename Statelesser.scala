@@ -172,6 +172,10 @@ object Statelesser2 {
         tr: TraversalAlgHom[Person, P, Peo]): P[List[String]] =
       (tr composeLens tr.alg.name).getAll
 
+    def getPeopleAge_[P[_], Peo](
+        tr: TraversalAlgHom[Person, P, Peo]): P[List[Int]] =
+      (tr composeLens tr.alg.age).getAll
+
     // raw version
     def getPeopleOnTheirThirties[P[_]: Functor, Peo](
         tr: TraversalAlgHom[Person, P, Peo]): P[List[(String, Int)]] =

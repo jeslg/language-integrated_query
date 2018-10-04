@@ -38,11 +38,12 @@ object Statelesser2Quill extends App {
         for {
           self <- StateT.get[Future, String]
           res <- sx(self).point[StateT[Future, String, ?]]
-          _ <- StateT.liftM(ctx.run(quote {
-            query[People]
-              .filter(_.name == lift(self))
-              .update(_.name -> lift(res._1))
-          }))
+          _ <- Monad[StateT[Future, String, ?]].whenM(res._1 != self)(
+            StateT.liftM(ctx.run(quote {
+              query[People]
+                .filter(_.name == lift(self))
+                .update(_.name -> lift(res._1))
+            })))
           _ <- StateT.put[Future, String](res._1)
         } yield res._2
       }),
@@ -56,11 +57,12 @@ object Statelesser2Quill extends App {
               .map(_.age)
           }))
           res <- sx(xs.head).point[StateT[Future, String, ?]]
-          _ <- StateT.liftM(ctx.run(quote {
-            query[People]
-              .filter(_.name == lift(self))
-              .update(_.age -> lift(res._1))
-          }))
+          _ <- Monad[StateT[Future, String, ?]].whenM(res._1 != xs.head)(
+            StateT.liftM(ctx.run(quote {
+              query[People]
+                .filter(_.name == lift(self))
+                .update(_.age -> lift(res._1))
+            })))
         } yield res._2
       }))
 
@@ -76,14 +78,129 @@ object Statelesser2Quill extends App {
   def waitResult[A](p: Future[A]): Unit =
     println(Await.result(p, 5000 millis))
 
+  // SELECT x7.name FROM people x7
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Alex']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Bert']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Cora']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Fred']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Drew']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Edna']
+  //
+  // =>
+  //
+  // SELECT x.name, x.age FROM People x
   waitResult(Primitives.getPeople(tr))
-  waitResult(Primitives.getPeopleName(tr))
-  waitResult(Primitives.getPeopleOnTheirThirties(tr))
+
+  // SELECT x7.name FROM people x7
+  //
+  // =>
+  //
+  // SELECT x1.name FROM People x1
+  waitResult(Primitives.getPeopleName_(tr))
+
+  // SELECT x7.name FROM people x7
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Cora']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Drew']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Bert']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Alex']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Edna']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Fred']
+  //
+  // =>
+  //
+  // SELECT x1.age FROM People x1
+  waitResult(Primitives.getPeopleAge_(tr))
+
+  // SELECT x7.name FROM people x7
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Edna']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Cora']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Alex']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Bert']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Drew']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Fred']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Cora']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Drew']
+  //
+  // =>
+  //
+  // SELECT p.name, p.age FROM People p WHERE 30 <= p.age AND p.age < 40
+  waitResult(Primitives.getPeopleOnTheirThirties_(tr))
+
+  // SELECT x7.name FROM people x7
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Cora']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Bert']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Drew']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Alex']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Edna']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Fred']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Drew']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Edna']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Cora']
+  //
+  // =>
+  //
+  // SELECT w.name FROM People w WHERE 30 <= w.age AND w.age < 40
   waitResult(AbstractingOverValues.range(tr)(20, 40))
+
+  // SELECT x7.name FROM people x7
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Drew']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Bert']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Alex']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Edna']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Fred']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Cora']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Drew']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Cora']
+  //
+  // =>
+  //
+  // SELECT w.name FROM People w WHERE 30 <= w.age AND w.age < 40
   waitResult(AbstractingOverAPredicate.range_(tr)(20, 40))
+   
+  // SELECT x7.name FROM people x7
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Edna']
+  // SELECT x7.name FROM people x7
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Bert']
+  // SELECT x7.name FROM people x7
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Bert']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Cora']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Alex']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Drew']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Edna']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Fred']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Edna']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Cora']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Drew']
+  //
+  // =>
+  //
+  // SELECT w.name 
+  //   FROM People u, People u1, People w 
+  //   WHERE u.name = 'Edna' AND 
+  //         u1.name = 'Bert' AND 
+  //         u.age <= w.age AND 
+  //         w.age < u1.age
   waitResult(ComposingQueries.compose(tr)("Edna", "Bert"))
+
+  // SELECT x7.name FROM people x7
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Alex']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Cora']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Drew']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Bert']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Edna']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Fred']
+  // UPDATE people SET name = ? WHERE name = ? - binds: ['DREW', 'Drew']
+  // UPDATE people SET name = ? WHERE name = ? - binds: ['CORA', 'Cora']
+  // SELECT x7.name FROM people x7
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Alex']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['CORA']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Bert']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Edna']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Fred']
+  // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['DREW']
   waitResult(
     Primitives.uppercasePeopleOnTheirThirties(tr) >> Primitives.getPeople(tr))
+   
   waitResult(
     Primitives.lowercasePeopleOnTheirThirties(tr) >> Primitives.getPeople(tr))
 }

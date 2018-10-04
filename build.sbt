@@ -26,5 +26,12 @@ libraryDependencies ++= Seq(
   "com.chuusai" %% "shapeless" % "2.3.3",
   "io.getquill" %% "quill-sql" % "2.5.4",
   "org.hablapps" %% "statelesser" % "0.1-SNAPSHOT",
-  "io.getquill" %% "quill-async-mysql" % "2.5.4")
+  "io.getquill" %% "quill-async-mysql" % "2.5.4",
+  "org.slf4j" % "slf4j-simple" % "1.7.25")
+
+javaOptions ++= Seq(
+  "-Dquill.binds.log=true",
+  "-Dorg.slf4j.simpleLogger.defaultLogLevel=debug")
+
+fork := true
 
