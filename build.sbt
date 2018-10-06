@@ -27,7 +27,11 @@ libraryDependencies ++= Seq(
   "io.getquill" %% "quill-sql" % "2.5.4",
   "org.hablapps" %% "statelesser" % "0.1-SNAPSHOT",
   "io.getquill" %% "quill-async-mysql" % "2.5.4",
-  "org.slf4j" % "slf4j-simple" % "1.7.25")
+  "org.slf4j" % "slf4j-simple" % "1.7.25",
+  "com.typesafe.slick" %% "slick" % "3.2.3",
+  "org.slf4j" % "slf4j-simple" % "1.6.4",
+  "com.typesafe.slick" %% "slick-hikaricp" % "3.2.3",
+  "mysql" % "mysql-connector-java" % "5.1.34")
 
 javaOptions ++= Seq(
   "-Dquill.binds.log=true",
