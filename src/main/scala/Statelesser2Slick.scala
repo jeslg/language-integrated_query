@@ -36,22 +36,31 @@ object Statelesser2Slick extends App {
 
     import Effect.{Read, Write}
 
-    def q0(n: Rep[String]) = for {
-      p <- people if (p.name === n)
-    } yield p.name
+    def getPerson(name: Rep[String]) =
+      people.filter(_.name === name)
 
-    def a0(n: Rep[String]) = q0(n).result.head
+    def getPersonName(name: Rep[String]) = 
+      getPerson(name).map(_.name)
 
-    def a1(n: Rep[String], v: String) = q0(n).update(v)
+    def gpnResult(name: Rep[String]) = getPersonName(name).result.head
 
-    def a2[Out](
-        n: Rep[String], 
-        sx: State[String, Out]): DBIOAction[Out, NoStream, Read with Write] =
+    def gpnUpdate(name: Rep[String], v: String) = getPersonName(name).update(v)
+
+    def evolve[A, Out](
+        res: Rep[String] => DBIOAction[A, NoStream, Read with Write],
+        upd: (Rep[String], A) => DBIOAction[Int, NoStream, Read with Write],
+        name: Rep[String],
+        sx: State[A, Out]): DBIOAction[Out, NoStream, Read with Write] =
       for {
-        s <- a0(n)
-        (s2, out) = sx(s)
-        _ <- a1(n, s2)
+        a <- res(name)
+        (a2, out) = sx(a)
+        _ <- upd(name, a2)
       } yield out
+
+    def evolvePersonName[Out](
+        name: Rep[String], 
+        sx: State[String, Out]): DBIOAction[Out, NoStream, Read with Write] =
+      evolve(gpnResult, gpnUpdate, name, sx)
 
     implicit def msDBIOAction: Monad[DBIOAction[?, NoStream, Read with Write]] =
       new Monad[DBIOAction[?, NoStream, Read with Write]] {
@@ -62,37 +71,34 @@ object Statelesser2Slick extends App {
           fa flatMap f
       }
 
-    val nat0 = new (State[String, ?] ~> 
-                    StateT[DBIOAction[?, NoStream, Read with Write], String, ?]) {
+    def nat0 = 
+      new (State[String, ?] ~> 
+           StateT[DBIOAction[?, NoStream, Read with Write], String, ?]) {
         def apply[A](sx: State[String, A]) =
           for {
             n <- StateT.get[DBIOAction[?, NoStream, Read with Write], String]
             out <- StateT.liftM[
               DBIOAction[?, NoStream, Read with Write], 
               String, 
-              A](a2(n, sx))
+              A](evolvePersonName(n, sx))
           } yield out
       }
 
-    // XXX: this is boilerplate!
+    // Evolving age
 
-    def q0_(n: Rep[String]) = for {
-      p <- people if (p.name === n)
-    } yield p.age
+    def getPersonAge(name: Rep[String]) =
+      getPerson(name).map(_.age)
 
-    def a0_(n: Rep[String]) = q0_(n).result.head
+    def gpaResult(name: Rep[String]) = getPersonAge(name).result.head
 
-    def a1_(n: Rep[String], v: Int) = q0_(n).update(v)
+    def gpaUpdate(name: Rep[String], v: Int) = getPersonAge(name).update(v)
 
-    def a2_[Out](
-        n: Rep[String], 
+    def evolvePersonAge[Out](
+        name: Rep[String], 
         sx: State[Int, Out]): DBIOAction[Out, NoStream, Read with Write] =
-      for {
-        s <- a0_(n)
-        (s2, out) = sx(s)
-        _ <- a1_(n, s2)
-      } yield out
+      evolve(gpaResult, gpaUpdate _, name, sx)
 
+    // XXX: we need a polymorphic method as input (for all A) to modularize this
     val nat1 = new (State[Int, ?] ~>
                     StateT[DBIOAction[?, NoStream, Read with Write], String, ?]) {
       def apply[A](sx: State[Int, A]) =
@@ -101,7 +107,7 @@ object Statelesser2Slick extends App {
           out <- StateT.liftM[
             DBIOAction[?, NoStream, Read with Write], 
             String, 
-            A](a2_(n, sx))
+            A](evolvePersonAge(n, sx))
         } yield out
       }
 

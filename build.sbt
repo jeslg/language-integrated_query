@@ -35,7 +35,7 @@ libraryDependencies ++= Seq(
 
 javaOptions ++= Seq(
   "-Dquill.binds.log=true",
-  "-Dorg.slf4j.simpleLogger.defaultLogLevel=debug")
+  "-Dorg.slf4j.simpleLogger.defaultLogLevel=info")
 
 fork := true
 
