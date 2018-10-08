@@ -124,19 +124,25 @@ object Statelesser2Slick extends App {
     def waitResult[A](p: Future[A]): Unit =
       println(Await.result(p, 5000 millis))
 
-    // SELECT x7.name FROM people x7
-    // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Alex']
-    // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Bert']
-    // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Cora']
-    // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Fred']
-    // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Drew']
-    // SELECT x3.age FROM people x3 WHERE x3.name = ? - binds: ['Edna']
-    //
-    // =>
-    //
-    // SELECT x.name, x.age FROM People x
     waitResult(Primitives.getPeople(tr))
 
+    waitResult(Primitives.getPeopleName_(tr))
+
+    waitResult(Primitives.getPeopleAge_(tr))
+
+    waitResult(Primitives.getPeopleOnTheirThirties_(tr))
+
+    waitResult(AbstractingOverValues.range(tr)(20, 40))
+
+    waitResult(AbstractingOverAPredicate.range_(tr)(20, 40))
+     
+    waitResult(ComposingQueries.compose(tr)("Edna", "Bert"))
+
+    waitResult(
+      Primitives.uppercasePeopleOnTheirThirties(tr) >> Primitives.getPeople(tr))
+     
+    waitResult(
+      Primitives.lowercasePeopleOnTheirThirties(tr) >> Primitives.getPeople(tr))
   } finally db.close
 }
 
