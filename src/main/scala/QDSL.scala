@@ -2,13 +2,48 @@ package org.hablapps.liq
 
 import io.getquill._
 
-object EDSL {
+object QDSL {
 
   val ctx = new SqlMirrorContext(MirrorSqlDialect, Literal)
   import ctx._
 
   case class People(name: String, age: Int)
   case class Couples(her: String, him: String)
+
+  object Primitives {
+    
+    val getPeople = quote {
+      query[People]
+    }
+
+    ctx.run(getPeople)
+
+    val getPeopleName = quote {
+      query[People].map(_.name)
+    }
+
+    ctx.run(getPeopleName)
+
+    val getPeopleOnTheirThirties = quote {
+      for {
+        p <- query[People]
+        if 30 <= p.age && p.age < 40
+      } yield p
+    }
+
+    ctx.run(getPeopleOnTheirThirties)
+
+    // Basically same as query[Couples] but this excludes women without a couple
+    val getHerAges = quote {
+      for {
+        w <- query[People]
+        n <- query[Couples].map(_.her)
+        if w.name == n
+      } yield w.age
+    }
+
+    ctx.run(getHerAges)
+  }
 
   object QueryViaQuotation {
 
