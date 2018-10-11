@@ -38,12 +38,6 @@ object Optics {
 
     def filter(p: A => Boolean): S => List[A] =
       tr.foldMap[List[A]](a => if (p(a)) List(a) else List.empty)
-
-    def filterMap[B](p: A => (Boolean, B)): S => List[B] =
-      s => filter(a => p(a)._1)(s).map(a => p(a)._2)
-
-    def filterMap[B](p: A => Boolean)(f: A => B): S => List[B] =
-      filterMap(a => (p(a), f(a)))
   }
 
   implicit class LensOps[S, A](ln: Lens[S, A]) {
@@ -66,6 +60,12 @@ object Optics {
       new Fold[S, B] {
         def foldMap[M: Monoid](g: B => M)(s: S): M =
           fl.foldMap(g compose f)(s)
+      }
+
+    def *[B](other: Fold[S, B]): Fold[S, (A, B)] = 
+      new Fold[S, (A, B)] {
+        def foldMap[M: Monoid](f: ((A, B)) => M)(s: S): M =
+          fl.getAll(s).zip(other.getAll(s)).foldMap(f)
       }
   }
 
@@ -137,17 +137,21 @@ object Optics {
   }
 
   object ComposingQueries {
-    import AbstractingOverValues.range
+    import AbstractingOverValues.rangeFl
     
-    def getAge(s: String): Fold[Couples, Int] =
+    def getAgeFl(s: String): Fold[Couples, Int] =
       all.composeTraversal(both)
          .asFold
          .withFilter(_.name == s)
          .composeLens(age)
 
-    // val compose = { (s: String, t: String) => (c: Couples) =>
-    //   (getAge3(s).headOption(c) |@| getAge3(t).headOption(c))(range(_, _))
-    // }
+    val compose = { (s: String, t: String) => (c: Couples) =>
+      (getAgeFl(s) * getAgeFl(t))
+        .headOption(c)
+        .map { case (a, b) => rangeFl(a, b) }
+    }
+
+    compose("Alex", "Drew")(couples).map(_.getAll(couples))
   }
 
   object Nested {
@@ -165,10 +169,6 @@ object Optics {
     val eachDpt = departments ^|->> each
     val eachEmp = employees ^|->> each
     val eachTsk = tasks ^|->> each
-
-    // XXX: we use optics, but we don't compose them. So weird!
-    def expertise2(u: String): NestedOrg => List[String] =
-      eachDpt.filterMap(eachEmp.all(eachTsk.contains(u)))(_.dpt)
 
     def expertise(u: String): Fold[NestedOrg, String] =
       eachDpt.asFold
