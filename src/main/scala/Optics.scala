@@ -23,6 +23,14 @@ object Optics {
 
   val all: Traversal[List[Couple], Couple] = each[List[Couple], Couple]
 
+  def fst[A, B]: Lens[(A, B), A] = first
+
+  def snd[A, B]: Lens[(A, B), B] = second
+
+  def flat[A, B, C] = Iso[(A, (B, C)), (A, B, C)] 
+    { case (a, (b, c)) => (a, b, c) } 
+    { case (a, b, c) => (a, (b, c)) }
+
   implicit class TraversalOps[S, A](tr: Traversal[S, A]) {
 
     def contains(a: A): S => Boolean =
@@ -36,11 +44,6 @@ object Optics {
 
     def filterMap[B](p: A => Boolean)(f: A => B): S => List[B] =
       filterMap(a => (p(a), f(a)))
-
-    def filterContent(p: A => Boolean): Fold[S, A] =
-      new Fold[S, A] {
-        def foldMap[M: Monoid](f: A => M)(s: S): M = ???
-      }
   }
 
   implicit class LensOps[S, A](ln: Lens[S, A]) {
@@ -49,6 +52,21 @@ object Optics {
       Lens[S, (A, B)](
         s => (ln.get(s), other.get(s)))(
         ab => s => other.set(ab._2)(ln.set(ab._1)(s)))
+  }
+
+  implicit class FoldOps[S, A](fl: Fold[S, A]) {
+
+    def withFilter(p: A => Boolean): Fold[S, A] =
+      new Fold[S, A] {
+        def foldMap[M: Monoid](f: A => M)(s: S): M =
+          fl.foldMap(a => if (p(a)) f(a) else Monoid[M].zero)(s)
+      }
+
+    def withMap[B](f: A => B): Fold[S, B] =
+      new Fold[S, B] {
+        def foldMap[M: Monoid](g: B => M)(s: S): M =
+          fl.foldMap(g compose f)(s)
+      }
   }
 
   object Primitives {
@@ -74,75 +92,62 @@ object Optics {
 
   object QueryViaQuotation {
     
-    val difference: Couples => List[(String, Int)] =
-      all.filterMap { c =>
-        (c.her.age > c.him.age, (c.her.name, c.her.age - c.him.age))
-      }
+    val differenceFl: Fold[Couples, (String, Int)] =
+      (all ^|-> (him ^|-> age) * (her ^|-> name * age) ^<-> flat).asFold
+        .withFilter { case (ma, _, wa) => wa > ma } 
+        .withMap { case (ma, wn, wa) => (wn, wa - ma) }
 
-    val difference2: Couples => List[(String, Int)] =
-      (all ^|-> (him ^|-> age) * (her ^|-> name * age)).filterMap {
-        case (ma, (wn, wa)) => (wa > ma, (wn, wa - ma))
-      }
+    val difference: Couples => List[(String, Int)] = differenceFl.getAll
+
+    difference(couples)
   }
 
   object AbstractingOverValues {
     import Primitives.coupledPeople
 
-    val range = { (a: Int, b: Int) =>
-      coupledPeople.filterMap { p =>
-        (a <= p.age && p.age < b, p.name)
-      }
+    val nameAgeTr = coupledPeople ^|-> name * age
+
+    val rangeFl: (Int, Int) => Fold[Couples, String] = { (a, b) =>
+      nameAgeTr.asFold
+               .withFilter { case (_, i) => a <= i && i < b }
+               .composeLens(fst)
     }
 
-    val nameAge = coupledPeople ^|-> name * age
-
-    val range2: (Int, Int) => Couples => List[String] = { (a, b) =>
-      nameAge.filterMap { case (s, i) =>
-        (a <= i && i < b, s)
-      }
+    val range: (Int, Int) => Couples => List[String] = { (a, b) => 
+      rangeFl(a, b).getAll 
     }
 
-    range(30, 40)
+    range(30, 40)(couples)
   }
 
   object AbstractingOverAPredicate {
-    import AbstractingOverValues.nameAge
+    import AbstractingOverValues.nameAgeTr
 
-    val satisfies = { (pred: Int => Boolean) =>
-      (all ^|->> both).filterMap(p => (pred(p.age), p.name))
+    val satisfiesFl: (Int => Boolean) => Fold[Couples, String] = { p =>
+      nameAgeTr.asFold 
+               .withFilter { case (_, a) => p(a) }
+               .composeLens(fst)
     }
 
-    val satisfies2: (Int => Boolean) => Couples => List[String] = { p =>
-      nameAge.filterMap { case (n, a) => (p(a), n) }
+    val satisfies: (Int => Boolean) => Couples => List[String] = { p =>
+      satisfiesFl(p).getAll
     }
 
-    satisfies(i => 30 <= i && i < 40)
+    satisfies(i => 30 <= i && i < 40)(couples)
   }
 
   object ComposingQueries {
     import AbstractingOverValues.range
-    import AbstractingOverValues.nameAge
     
-    val getAge = { (s: String) =>
-      (all ^|->> both).filterMap(p => (p.name == s, p.age))
-    }
+    def getAge(s: String): Fold[Couples, Int] =
+      all.composeTraversal(both)
+         .asFold
+         .withFilter(_.name == s)
+         .composeLens(age)
 
-    val getAge2: String => Couples => List[Int] = { (s: String) =>
-      nameAge.filterMap { case (n, a) => (n == s, a) }
-    }
-
-    // XXX: filtering by content should be safe for `Fold`s. Check it!
-    def getAge3(s: String): Fold[Couples, Int] =
-      all.composeTraversal(both).filterContent(_.name == s).composeLens(age)
-
-    // XXX: we should be composing optics instead of Options, this isn't valid!
-    val compose = { (s: String, t: String) => (c: Couples) =>
-      (getAge(s)(c).headOption |@| getAge(t)(c).headOption)(range(_, _))
-    }
-
-    val compose2 = { (s: String, t: String) => (c: Couples) =>
-      (getAge3(s).headOption(c) |@| getAge3(t).headOption(c))(range(_, _))
-    }
+    // val compose = { (s: String, t: String) => (c: Couples) =>
+    //   (getAge3(s).headOption(c) |@| getAge3(t).headOption(c))(range(_, _))
+    // }
   }
 
   object Nested {
@@ -162,8 +167,13 @@ object Optics {
     val eachTsk = tasks ^|->> each
 
     // XXX: we use optics, but we don't compose them. So weird!
-    def expertise(u: String): NestedOrg => List[String] =
+    def expertise2(u: String): NestedOrg => List[String] =
       eachDpt.filterMap(eachEmp.all(eachTsk.contains(u)))(_.dpt)
+
+    def expertise(u: String): Fold[NestedOrg, String] =
+      eachDpt.asFold
+             .withFilter(eachEmp.all(eachTsk.contains(u)))
+             .composeLens(dpt)
   }
 }
 
