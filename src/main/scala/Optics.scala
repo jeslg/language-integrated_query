@@ -105,11 +105,10 @@ object Optics {
   object AbstractingOverValues {
     import Primitives.coupledPeople
 
-    val nameAgeTr = coupledPeople ^|-> name * age
+    val nameAgeTr = (coupledPeople ^|-> name * age).asFold
 
     val rangeFl: (Int, Int) => Fold[Couples, String] = { (a, b) =>
-      nameAgeTr.asFold
-               .withFilter { case (_, i) => a <= i && i < b }
+      nameAgeTr.withFilter { case (_, i) => a <= i && i < b }
                .composeLens(fst)
     }
 
@@ -124,8 +123,7 @@ object Optics {
     import AbstractingOverValues.nameAgeTr
 
     val satisfiesFl: (Int => Boolean) => Fold[Couples, String] = { p =>
-      nameAgeTr.asFold 
-               .withFilter { case (_, a) => p(a) }
+      nameAgeTr.withFilter { case (_, a) => p(a) }
                .composeLens(fst)
     }
 
