@@ -99,8 +99,11 @@ object Optics {
     val getPeopleName: People => List[String] =
       (people ^|-> name).getAll
 
-    val getPeopleOnTheirThirties: People => People =
-      people.filter(p => 30 <= p.age && p.age < 40)
+    val getPeopleOnTheirThirtiesFl: Fold[People, Person] =
+      people.asFold.withFilter(p => 30 <= p.age && p.age < 40)
+
+    val getPeopleOnTheirThirties: People => List[Person] =
+      getPeopleOnTheirThirtiesFl.getAll
 
     val getHerAges: Couples => List[Int] =
       (all ^|-> her ^|-> age).getAll
@@ -121,10 +124,10 @@ object Optics {
   object AbstractingOverValues {
     import Primitives.coupledPeople
 
-    val nameAgeTr = (coupledPeople ^|-> name * age).asFold
+    val nameAgeFl = (coupledPeople ^|-> name * age).asFold
 
     val rangeFl: (Int, Int) => Fold[Couples, String] = { (a, b) =>
-      nameAgeTr.withFilter { case (_, i) => a <= i && i < b }
+      nameAgeFl.withFilter { case (_, i) => a <= i && i < b }
                .composeLens(fst)
     }
 
@@ -136,10 +139,10 @@ object Optics {
   }
 
   object AbstractingOverAPredicate {
-    import AbstractingOverValues.nameAgeTr
+    import AbstractingOverValues.nameAgeFl
 
     val satisfiesFl: (Int => Boolean) => Fold[Couples, String] = { p =>
-      nameAgeTr.withFilter { case (_, a) => p(a) }
+      nameAgeFl.withFilter { case (_, a) => p(a) }
                .composeLens(fst)
     }
 
@@ -155,9 +158,10 @@ object Optics {
     
     def getAgeFl(s: String): Fold[Couples, Int] =
       all.composeTraversal(both)
+         .composeLens(name * age) 
          .asFold
-         .withFilter(_.name == s)
-         .composeLens(age)
+         .withFilter { case (n, _) => n == s }
+         .composeLens(snd)
 
     val composeFl = { (s: String, t: String) =>
       (getAgeFl(s) * getAgeFl(t)).flatMap { case (a, b) => rangeFl(a, b) }
