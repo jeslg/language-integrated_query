@@ -67,6 +67,12 @@ object Optics {
         def foldMap[M: Monoid](f: ((A, B)) => M)(s: S): M =
           fl.getAll(s).zip(other.getAll(s)).foldMap(f)
       }
+
+    def flatMap[B](f: A => Fold[S, B]): Fold[S, B] =
+      new Fold[S, B] {
+        def foldMap[M: Monoid](g: B => M)(s: S): M =
+          fl.getAll(s).map(f).map(_.foldMap(g)(s)).suml
+      }
   }
 
   object Primitives {
@@ -143,13 +149,15 @@ object Optics {
          .withFilter(_.name == s)
          .composeLens(age)
 
-    val compose = { (s: String, t: String) => (c: Couples) =>
-      (getAgeFl(s) * getAgeFl(t))
-        .headOption(c)
-        .map { case (a, b) => rangeFl(a, b) }
+    val composeFl = { (s: String, t: String) =>
+      (getAgeFl(s) * getAgeFl(t)).flatMap { case (a, b) => rangeFl(a, b) }
     }
 
-    compose("Alex", "Drew")(couples).map(_.getAll(couples))
+    val compose: (String, String) => Couples => List[String] = { (s, t) =>
+      composeFl(s, t).getAll
+    }
+
+    compose("Alex", "Drew")(couples)
   }
 
   object Nested {
