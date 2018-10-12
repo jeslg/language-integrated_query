@@ -71,8 +71,18 @@ object Optics {
     def flatMap[B](f: A => Fold[S, B]): Fold[S, B] =
       new Fold[S, B] {
         def foldMap[M: Monoid](g: B => M)(s: S): M =
-          fl.getAll(s).map(f).map(_.foldMap(g)(s)).suml
+          fl.getAll(s).foldMap(f(_).foldMap(g)(s))
       }
+  }
+
+  implicit def foldMonad[S] = new Monad[Fold[S, ?]] {
+
+    def point[A](a: => A): Fold[S, A] = new Fold[S, A] {
+      def foldMap[M: Monoid](f: A => M)(s: S): M = f(a)
+    }
+
+    def bind[A, B](fa: Fold[S, A])(f: A => Fold[S, B]): Fold[S, B] =
+      fa.flatMap(f)
   }
 
   object Primitives {
@@ -151,6 +161,15 @@ object Optics {
 
     val composeFl = { (s: String, t: String) =>
       (getAgeFl(s) * getAgeFl(t)).flatMap { case (a, b) => rangeFl(a, b) }
+    }
+
+    // or alternatively
+    val composeFl2 = { (s: String, t: String) =>
+      for {
+        a <- getAgeFl(s)
+        b <- getAgeFl(t)
+        x <- rangeFl(a, b)
+      } yield x
     }
 
     val compose: (String, String) => Couples => List[String] = { (s, t) =>
