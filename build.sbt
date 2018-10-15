@@ -2,12 +2,11 @@ name := "language-integrated_query"
 
 organization := "org.hablapps"
 
-inThisBuild(Seq(
-  scalaOrganization := "org.typelevel",
-  scalaVersion := "2.12.4-bin-typelevel-4"
-))
+scalaVersion := "2.12.7"
 
-addCompilerPlugin("io.tryp" % "splain" % "0.3.1" cross CrossVersion.patch)
+addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.full)
+
+// addCompilerPlugin("io.tryp" % "splain" % "0.3.1" cross CrossVersion.patch)
 
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
 
@@ -31,7 +30,11 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick" % "3.2.3",
   "org.slf4j" % "slf4j-simple" % "1.6.4",
   "com.typesafe.slick" %% "slick-hikaricp" % "3.2.3",
-  "mysql" % "mysql-connector-java" % "5.1.34")
+  "mysql" % "mysql-connector-java" % "5.1.34",
+  "com.github.julien-truffaut" %%  "monocle-core"  % "1.5.0",
+  "com.github.julien-truffaut" %%  "monocle-macro" % "1.5.0",
+  "com.github.julien-truffaut" %%  "monocle-law"   % "1.5.0" % "test"
+)
 
 javaOptions ++= Seq(
   "-Dquill.binds.log=true",
