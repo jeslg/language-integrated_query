@@ -11,8 +11,8 @@ object QDSL {
   case class Couples(her: String, him: String)
 
   object Primitives {
-    
-    val getPeople = quote {
+
+    val getPeople: ctx.Quoted[ctx.EntityQuery[People]] = quote {
       query[People]
     }
 
@@ -31,7 +31,24 @@ object QDSL {
       } yield p
     }
 
+    def getPeopleUnderFiftyDyn(people: Quoted[EntityQuery[People]]) = quote {
+      for {
+        p <- people
+        if 30 <= p.age && p.age < 40
+      } yield p
+    }
+
+    val getPeopleUnderFifty = quote {
+      for {
+        p <- query[People]
+        if p.age < 50
+      } yield p
+    }
+
     ctx.run(getPeopleOnTheirThirties)
+    ctx.run(getPeopleUnderFiftyDyn(query[People]))
+    ctx.run(getPeopleUnderFifty)
+
 
     // Basically same as query[Couples] but this excludes women without a couple
     val getHerAges = quote {
@@ -60,7 +77,7 @@ object QDSL {
   }
 
   object AbstractingOverValues {
-    
+
     val range = quote { (a: Int, b: Int) =>
       for {
         w <- query[People]
@@ -72,7 +89,7 @@ object QDSL {
   }
 
   object AbstractingOverAPredicate {
-    
+
     val satisfies = quote { (p: Int => Boolean) =>
       for {
         w <- query[People]
@@ -105,8 +122,8 @@ object QDSL {
   }
 
   object DynamicallyGeneratedQueries {
-    import AbstractingOverAPredicate.satisfies 
-    
+    import AbstractingOverAPredicate.satisfies
+
     sealed abstract class Predicate
     case class Above(x: Int) extends Predicate
     case class Below(x: Int) extends Predicate
@@ -126,13 +143,13 @@ object QDSL {
     val t0: Predicate = And(Above(30), Below(40))
     val t1: Predicate = Not(Or(Below(30), Above(40)))
 
-    // Dynamic queries, can't be generated at compile time  
+    // Dynamic queries, can't be generated at compile time
     ctx.run(satisfies(P(t0)))
     ctx.run(satisfies(P(t1)))
   }
 
   object Nesting {
-    
+
     case class Departments(dpt: String)
     case class Employees(dpt: String, emp: String)
     case class Tasks(emp: String, tsk: String)

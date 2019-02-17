@@ -1,0 +1,85 @@
+[0m[[0mdebug[0m] [0m[naha] [0m
+[0m[[0mdebug[0m] [0m[naha] Initial source changes: [0m
+[0m[[0mdebug[0m] [0m[naha] 	removed:Set()[0m
+[0m[[0mdebug[0m] [0m[naha] 	added: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] 	modified: Set(/Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala)[0m
+[0m[[0mdebug[0m] [0m[naha] Invalidated products: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] External API changes: API Changes: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] Modified binary dependencies: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] Initial directly invalidated sources: Set(/Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala)[0m
+[0m[[0mdebug[0m] [0m[naha] [0m
+[0m[[0mdebug[0m] [0m[naha] Sources indirectly invalidated by:[0m
+[0m[[0mdebug[0m] [0m[naha] 	product: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] 	binary dep: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] 	external source: Set()[0m
+[0m[[0mdebug[0m] [0mAll initially invalidated sources: Set(/Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala)[0m
+[0m[[0mdebug[0m] [0m[naha] Initial set of included nodes: Set(/Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala)[0m
+[0m[[0minfo[0m] [0mCompiling 1 Scala source to /Users/jserrano/Documents/language-integrated_query/target/scala-2.12/classes...[0m
+[0m[[0mdebug[0m] [0mGetting org.scala-sbt:compiler-interface:0.13.17:component from component compiler for Scala 2.12.7[0m
+[0m[[0mdebug[0m] [0mGetting org.scala-sbt:compiler-interface:0.13.17:component from component compiler for Scala 2.12.7[0m
+[0m[[0mdebug[0m] [0mRunning cached compiler 6e57efee, interfacing (CompilerInterface) with Scala compiler version 2.12.7[0m
+[0m[[0mdebug[0m] [0mCalling Scala compiler with arguments  (CompilerInterface):[0m
+[0m[[0mdebug[0m] [0m	-Xlint[0m
+[0m[[0mdebug[0m] [0m	-unchecked[0m
+[0m[[0mdebug[0m] [0m	-deprecation[0m
+[0m[[0mdebug[0m] [0m	-feature[0m
+[0m[[0mdebug[0m] [0m	-Ypartial-unification[0m
+[0m[[0mdebug[0m] [0m	-language:postfixOps[0m
+[0m[[0mdebug[0m] [0m	-language:implicitConversions[0m
+[0m[[0mdebug[0m] [0m	-language:higherKinds[0m
+[0m[[0mdebug[0m] [0m	-Xplugin:/Users/jserrano/.ivy2/cache/org.scalamacros/paradise_2.12.7/jars/paradise_2.12.7-2.1.0.jar[0m
+[0m[[0mdebug[0m] [0m	-Xplugin:/Users/jserrano/.ivy2/cache/org.spire-math/kind-projector_2.12/jars/kind-projector_2.12-0.9.3.jar[0m
+[0m[[0mdebug[0m] [0m	-bootclasspath[0m
+[0m[[0mdebug[0m] [0m	/Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/jre/lib/sunrsasign.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/jre/classes:/Users/jserrano/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.12.7.jar[0m
+[0m[[0mdebug[0m] [0m	-classpath[0m
+[0m[[0mdebug[0m] [0m	/Users/jserrano/Documents/language-integrated_query/target/scala-2.12/classes:/Users/jserrano/.ivy2/cache/org.scalaz/scalaz-core_2.12/bundles/scalaz-core_2.12-7.2.26.jar:/Users/jserrano/.ivy2/cache/com.chuusai/shapeless_2.12/bundles/shapeless_2.12-2.3.3.jar:/Users/jserrano/.ivy2/cache/org.typelevel/macro-compat_2.12/jars/macro-compat_2.12-1.1.1.jar:/Users/jserrano/.ivy2/cache/io.getquill/quill-sql_2.12/jars/quill-sql_2.12-2.5.4.jar:/Users/jserrano/.ivy2/cache/io.getquill/quill-core_2.12/jars/quill-core_2.12-2.5.4.jar:/Users/jserrano/.ivy2/cache/org.scalamacros/resetallattrs_2.12/jars/resetallattrs_2.12-1.0.0.jar:/Users/jserrano/.ivy2/cache/com.typesafe/config/bundles/config-1.3.2.jar:/Users/jserrano/.ivy2/cache/com.typesafe.scala-logging/scala-logging_2.12/bundles/scala-logging_2.12-3.7.2.jar:/Users/jserrano/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.12.7.jar:/Users/jserrano/.ivy2/cache/org.slf4j/slf4j-api/jars/slf4j-api-1.7.25.jar:/Users/jserrano/.ivy2/local/org.hablapps/statelesser_2.12/0.1.0-SNAPSHOT/jars/statelesser_2.12.jar:/Users/jserrano/.ivy2/cache/com.github.julien-truffaut/monocle-core_2.12/jars/monocle-core_2.12-1.5.0.jar:/Users/jserrano/.ivy2/cache/com.github.julien-truffaut/monocle-macro_2.12/jars/monocle-macro_2.12-1.5.0.jar:/Users/jserrano/.ivy2/cache/org.scalactic/scalactic_2.12/bundles/scalactic_2.12-3.0.5.jar:/Users/jserrano/.ivy2/cache/io.getquill/quill-async-mysql_2.12/jars/quill-async-mysql_2.12-2.5.4.jar:/Users/jserrano/.ivy2/cache/io.getquill/quill-async_2.12/jars/quill-async_2.12-2.5.4.jar:/Users/jserrano/.ivy2/cache/com.github.mauricio/db-async-common_2.12/jars/db-async-common_2.12-0.2.21.jar:/Users/jserrano/.ivy2/cache/joda-time/joda-time/jars/joda-time-2.9.7.jar:/Users/jserrano/.ivy2/cache/org.joda/joda-convert/jars/joda-convert-1.8.1.jar:/Users/jserrano/.ivy2/cache/io.netty/netty-all/jars/netty-all-4.1.6.Final.jar:/Users/jserrano/.ivy2/cache/org.javassist/javassist/bundles/javassist-3.21.0-GA.jar:/Users/jserrano/.ivy2/cache/com.github.mauricio/mysql-async_2.12/jars/mysql-async_2.12-0.2.21.jar:/Users/jserrano/.ivy2/cache/org.slf4j/slf4j-simple/jars/slf4j-simple-1.7.25.jar:/Users/jserrano/.ivy2/cache/com.typesafe.slick/slick_2.12/bundles/slick_2.12-3.2.3.jar:/Users/jserrano/.ivy2/cache/org.reactivestreams/reactive-streams/jars/reactive-streams-1.0.0.jar:/Users/jserrano/.ivy2/cache/com.typesafe.slick/slick-hikaricp_2.12/bundles/slick-hikaricp_2.12-3.2.3.jar:/Users/jserrano/.ivy2/cache/com.zaxxer/HikariCP/bundles/HikariCP-2.5.1.jar:/Users/jserrano/.ivy2/cache/mysql/mysql-connector-java/jars/mysql-connector-java-5.1.34.jar[0m
+[0m[[0minfo[0m] [0m/Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala:19: Dynamic query[0m
+[0m[[0minfo[0m] [0m    ctx.run(getPeople)[0m
+[0m[[0minfo[0m] [0m           ^[0m
+[0m[[0minfo[0m] [0m/Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala:25: SELECT x1.name FROM People x1[0m
+[0m[[0minfo[0m] [0m    ctx.run(getPeopleName)[0m
+[0m[[0minfo[0m] [0m           ^[0m
+[0m[[0minfo[0m] [0m/Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala:48: SELECT p.name, p.age FROM People p WHERE 30 <= p.age AND p.age < 40[0m
+[0m[[0minfo[0m] [0m    ctx.run(getPeopleOnTheirThirties)[0m
+[0m[[0minfo[0m] [0m           ^[0m
+[0m[[0minfo[0m] [0m/Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala:49: Dynamic query[0m
+[0m[[0minfo[0m] [0m    ctx.run(getPeopleUnderFiftyDyn(query[People]))[0m
+[0m[[0minfo[0m] [0m           ^[0m
+[0m[[0minfo[0m] [0m/Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala:50: SELECT p.name, p.age FROM People p WHERE p.age < 50[0m
+[0m[[0minfo[0m] [0m    ctx.run(getPeopleUnderFifty)[0m
+[0m[[0minfo[0m] [0m           ^[0m
+[0m[[0minfo[0m] [0m/Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala:62: SELECT w.age FROM People w, Couples x2 WHERE w.name = x2.her[0m
+[0m[[0minfo[0m] [0m    ctx.run(getHerAges)[0m
+[0m[[0minfo[0m] [0m           ^[0m
+[0m[[0minfo[0m] [0m/Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala:76: SELECT w.name, w.age - m.age FROM Couples c, People w, People m WHERE c.her = w.name AND c.him = m.name AND w.age > m.age[0m
+[0m[[0minfo[0m] [0m    ctx.run(difference)[0m
+[0m[[0minfo[0m] [0m           ^[0m
+[0m[[0minfo[0m] [0m/Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala:88: SELECT w.name FROM People w WHERE 30 <= w.age AND w.age < 40[0m
+[0m[[0minfo[0m] [0m    ctx.run(range(30, 40))[0m
+[0m[[0minfo[0m] [0m           ^[0m
+[0m[[0minfo[0m] [0m/Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala:100: SELECT w.name FROM People w WHERE 30 <= w.age AND w.age < 40[0m
+[0m[[0minfo[0m] [0m    ctx.run(satisfies(x => 30 <= x && x < 40))[0m
+[0m[[0minfo[0m] [0m           ^[0m
+[0m[[0minfo[0m] [0m/Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala:121: SELECT w.name FROM People u, People u1, People w WHERE u.name = 'Edna' AND u1.name = 'Bert' AND u.age <= w.age AND w.age < u1.age[0m
+[0m[[0minfo[0m] [0m    ctx.run(compose("Edna", "Bert"))[0m
+[0m[[0minfo[0m] [0m           ^[0m
+[0m[[0minfo[0m] [0m/Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala:147: Dynamic query[0m
+[0m[[0minfo[0m] [0m    ctx.run(satisfies(P(t0)))[0m
+[0m[[0minfo[0m] [0m           ^[0m
+[0m[[0minfo[0m] [0m/Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala:148: Dynamic query[0m
+[0m[[0minfo[0m] [0m    ctx.run(satisfies(P(t1)))[0m
+[0m[[0minfo[0m] [0m           ^[0m
+[0m[[0mdebug[0m] [0mScala compilation took 5.647871328 s[0m
+[0m[[0mdebug[0m] [0m[naha] Invalidating /Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala...[0m
+[0m[[0mdebug[0m] [0m[naha] Invalidating (transitively) by inheritance from /Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala...[0m
+[0m[[0mdebug[0m] [0m[naha] Initial set of included nodes: Set(/Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala)[0m
+[0m[[0mdebug[0m] [0m[naha] Invalidated by transitive inheritance dependency: Set(/Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala)[0m
+[0m[[0mdebug[0m] [0m[naha] The /Users/jserrano/Documents/language-integrated_query/src/main/scala/QDSL.scala source file has the following regular definitions changed:[0m
+[0m[[0mdebug[0m] [0m[naha] 	satisfies, id1240814244, compose, id572747406, id995989808, id1837771836, id30180739, getPeopleUnderFifty, id366531467, id1871783038, id529267070, id882683924, range, id582247733, id169079484, quoted, getAge, getPeopleOnTheirThirties, getPeopleName, id253228412, id1091562431, id1975711342, id579014621, getHerAges, id1896586034, id1001966991, difference, id277196230.[0m
+[0m[[0mdebug[0m] [0m[naha] All member reference dependencies will be considered within this context.[0m
+[0m[[0mdebug[0m] [0m[naha] New invalidations:[0m
+[0m[[0mdebug[0m] [0m[naha] 	Set()[0m
+[0m[[0mdebug[0m] [0m[naha] Initial set of included nodes: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] Previously invalidated, but (transitively) depend on new invalidations:[0m
+[0m[[0mdebug[0m] [0m[naha] 	Set()[0m
+[0m[[0mdebug[0m] [0m[naha] All newly invalidated sources after taking into account (previously) recompiled sources:Set()[0m

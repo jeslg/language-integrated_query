@@ -1,0 +1,7 @@
+~†est:compile
+~test:compile
+update
+reload
+update
+~test:compile
+exit
